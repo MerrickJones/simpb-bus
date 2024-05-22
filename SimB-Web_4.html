@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SimpB by Shan & Merrick &copy;</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .input-container {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        margin-bottom: 15px;
+      }
+      .input-box {
+        display: flex;
+        flex-direction: column;
+        margin: 0 5px;
+      }
+      .input-box label {
+        margin-bottom: 5px;
+      }
+      .input-box input {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+      .table-container {
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+      table {
+        width: 95%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .table-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px;
+      }
+      #output {
+        border: 1px solid #ccc;
+        padding: 10px;
+        white-space: pre-wrap;
+        margin-top: 20px;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Simplified B Input</h1>
+
+    <div class="input-container">
+      <div class="input-box">
+        <label for="layers">No. of Layers:</label>
+        <input type="number" id="layers" oninput="generateTables()" min="1" />
+      </div>
+      <div class="input-box">
+        <label for="alpha">α:</label>
+        <input type="text" id="alpha" oninput="updateOutput()" />
+      </div>
+      <div class="input-box">
+        <label for="beta">β:</label>
+        <input type="text" id="beta" oninput="updateOutput()" />
+      </div>
+    </div>
+
+    <div id="table-container-1" class="table-container">
+      <!-- Dynamic table 1 will be inserted here -->
+    </div>
+    <div id="table-container-2" class="table-container">
+      <!-- Dynamic table 2 will be inserted here -->
+    </div>
+
+    <div class="input-container">
+      <div class="input-box">
+        <label for="stages">No. of Stages:</label>
+        <input
+          type="number"
+          id="stages"
+          oninput="generateStageTable()"
+          min="1"
+        />
+      </div>
+    </div>
+
+    <div id="table-container-3" class="table-container">
+      <!-- Dynamic table 3 will be inserted here -->
+    </div>
+
+    <div class="input-container">
+      <div class="input-box">
+        <label for="terms">Terms of series:</label>
+        <input
+          type="number"
+          id="terms"
+          oninput="generateDrainTable()"
+          min="1"
+        />
+      </div>
+      <div class="input-box">
+        <label for="drainage">Drainage (1:one way, 2:two way):</label>
+        <input
+          type="number"
+          id="drainage"
+          oninput="updateOutput()"
+          min="1"
+          max="2"
+        />
+      </div>
+      <div class="input-box">
+        <label for="unitWeight">Unit weight of water (kN/m3):</label>
+        <input type="number" id="unitWeight" oninput="updateOutput()" min="0" />
+      </div>
+    </div>
+
+    <div id="table-container-4" class="table-container">
+      <!-- Dynamic table 4 will be inserted here -->
+    </div>
+
+    <div class="input-container">
+      <div class="input-box">
+        <label for="depthPoints"
+          >No. of depth point to output pore water pressure:</label
+        >
+        <input
+          type="number"
+          id="depthPoints"
+          oninput="generateDepthTable()"
+          min="1"
+        />
+      </div>
+    </div>
+
+    <div id="table-container-5" class="table-container">
+      <!-- Dynamic table 5 will be inserted here -->
+    </div>
+
+    <h2>Output:</h2>
+    <div id="output">
+      <!-- Output will be displayed here -->
+    </div>
+    <button onclick="exportToFile()">Export to Text File</button>
+
+    <script>
+      function updateOutput() {
+        const layers = document.getElementById("layers").value;
+        const alpha = document.getElementById("alpha").value;
+        const beta = document.getElementById("beta").value;
+        const stages = document.getElementById("stages").value;
+        const terms = document.getElementById("terms").value;
+        const drainage = document.getElementById("drainage").value;
+        const unitWeight = document.getElementById("unitWeight").value;
+
+        let output = `${layers} ${alpha} ${beta}\n`;
+
+        // Gather input values from the first table
+        const table1 = document.querySelector("#table-container-1 table");
+        if (table1) {
+          const rows = table1.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            output += `${rowData}\n`;
+          });
+        }
+
+        // Gather input values from the second table
+        const table2 = document.querySelector("#table-container-2 table");
+        if (table2) {
+          const rows = table2.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            output += `${rowData}\n`;
+          });
+        }
+
+        // Output the number of stages
+        output += `${stages}\n`;
+
+        // Gather input values from the third table
+        const table3 = document.querySelector("#table-container-3 table");
+        if (table3) {
+          const rows = table3.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            output += `${rowData}\n`;
+          });
+        }
+
+        output += `${terms} ${drainage} ${unitWeight}\n`;
+
+        // Gather input values from the fourth table
+        const table4 = document.querySelector("#table-container-4 table");
+        if (table4) {
+          const rows = table4.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            output += `${rowData}\n`;
+          });
+        }
+
+        // Gather input values from the fifth table
+        const table5 = document.querySelector("#table-container-5 table");
+        if (table5) {
+          const rows = table5.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const input = row.querySelector("input");
+            output += `${input.value}\n`;
+          });
+        }
+
+        document.getElementById("output").innerText = output;
+      }
+
+      function generateTables() {
+        const layers = document.getElementById("layers").value;
+        generateTable1(layers);
+        generateTable2(layers);
+        generateDrainTable(); // Ensure the fourth table is updated based on the number of layers
+        updateOutput(); // Ensure output is updated when the tables are generated
+      }
+
+      function generateTable1(layers) {
+        const container = document.getElementById("table-container-1");
+        container.innerHTML = ""; // Clear any existing table
+
+        if (layers > 0) {
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          // Create table headers
+          const headers = [
+            "Thickness (m)",
+            "No. of divisions",
+            "Unit weight (kN/m3)",
+            "is_OCR/POP (0:OCR; 1:POP)",
+            "OCR or POP value",
+            "V (1+e0)",
+            "t0 (day)",
+          ];
+          const headerRow = document.createElement("tr");
+          headers.forEach((headerText) => {
+            const th = document.createElement("th");
+            th.innerText = headerText;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          // Create table rows
+          for (let i = 0; i < layers; i++) {
+            const row = document.createElement("tr");
+            for (let j = 0; j < headers.length; j++) {
+              const td = document.createElement("td");
+              const input = document.createElement("input");
+              input.type = "text";
+              input.classList.add("table-input");
+              input.oninput = updateOutput; // Update output when table input changes
+              td.appendChild(input);
+              row.appendChild(td);
+            }
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+      }
+
+      function generateTable2(layers) {
+        const container = document.getElementById("table-container-2");
+        container.innerHTML = ""; // Clear any existing table
+
+        if (layers > 0) {
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          // Create table headers
+          const headers = [
+            "Compression index (Ce)",
+            "Recompression index (Cc)",
+            "Vertical Permeability (m/yr)",
+            "Horizontal Permeability (m/yr)",
+            "Creep index (Cα)",
+          ];
+          const headerRow = document.createElement("tr");
+          headers.forEach((headerText) => {
+            const th = document.createElement("th");
+            th.innerText = headerText;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          // Create table rows
+          for (let i = 0; i < layers; i++) {
+            const row = document.createElement("tr");
+            for (let j = 0; j < headers.length; j++) {
+              const td = document.createElement("td");
+              const input = document.createElement("input");
+              input.type = "text";
+              input.classList.add("table-input");
+              input.oninput = updateOutput; // Update output when table input changes
+              td.appendChild(input);
+              row.appendChild(td);
+            }
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+      }
+
+      function generateStageTable() {
+        const stages = document.getElementById("stages").value;
+        const container = document.getElementById("table-container-3");
+        container.innerHTML = ""; // Clear any existing table
+
+        if (stages > 0) {
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          // Create table headers
+          const headers = [
+            "Vertical stress (kPa)",
+            "Construction time (yr)",
+            "Stage duration (yr)",
+            "Incremental of load (j-1) to j (kPa)",
+            "Stage starting time (yr)",
+          ];
+          const headerRow = document.createElement("tr");
+          headers.forEach((headerText) => {
+            const th = document.createElement("th");
+            th.innerText = headerText;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          // Create table rows
+          for (let i = 0; i < stages; i++) {
+            const row = document.createElement("tr");
+            for (let j = 0; j < headers.length; j++) {
+              const td = document.createElement("td");
+              const input = document.createElement("input");
+              input.type = "text";
+              input.classList.add("table-input");
+              input.oninput = updateOutput; // Update output when table input changes
+              td.appendChild(input);
+              row.appendChild(td);
+            }
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+
+        updateOutput(); // Ensure output is updated when the table is generated
+      }
+
+      function generateDrainTable() {
+        const layers = document.getElementById("layers").value;
+        const container = document.getElementById("table-container-4");
+        container.innerHTML = ""; // Clear any existing table
+
+        if (layers > 0) {
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const tbody = document.createElement("tbody");
+
+          // Create table headers
+          const headers = [
+            "Drain spacing (m)",
+            "Drain radius (m)",
+            "Ratio of smear to drain radius",
+            "Ratio of undisturbed horizontal permeability to smear zone permeability at drain soil interface",
+            "Include drain (0: no drain; 1: include drain)",
+            "Drain pattern (0: Triangle; 1: Square)",
+            "Type of smear zone*",
+          ];
+          const headerRow = document.createElement("tr");
+          headers.forEach((headerText) => {
+            const th = document.createElement("th");
+            th.innerText = headerText;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          // Create table rows
+          for (let i = 0; i < layers; i++) {
+            const row = document.createElement("tr");
+            for (let j = 0; j < headers.length; j++) {
+              const td = document.createElement("td");
+              const input = document.createElement("input");
+              input.type = "text";
+              input.classList.add("table-input");
+              input.oninput = updateOutput; // Update output when table input changes
+              td.appendChild(input);
+              row.appendChild(td);
+            }
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+      }
+
+      function generateDepthTable() {
+        const depthPoints = document.getElementById("depthPoints").value;
+        const container = document.getElementById("table-container-5");
+        container.innerHTML = ""; // Clear any existing table
+
+        if (depthPoints > 0) {
+          const table = document.createElement("table");
+          const tbody = document.createElement("tbody");
+
+          // Create table rows
+          for (let i = 0; i < depthPoints * 4; i++) {
+            const row = document.createElement("tr");
+            const td = document.createElement("td");
+            const input = document.createElement("input");
+            input.type = "text";
+            input.classList.add("table-input");
+            td.appendChild(input);
+            row.appendChild(td);
+            tbody.appendChild(row);
+          }
+
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+
+        updateOutput(); // Ensure output is updated when the table is generated
+      }
+
+      function exportToFile() {
+        const layers = document.getElementById("layers").value;
+        const alpha = document.getElementById("alpha").value;
+        const beta = document.getElementById("beta").value;
+        const stages = document.getElementById("stages").value;
+        const terms = document.getElementById("terms").value;
+        const drainage = document.getElementById("drainage").value;
+        const unitWeight = document.getElementById("unitWeight").value;
+
+        let content = `${layers} ${alpha} ${beta}\n`;
+
+        const table1 = document.querySelector("#table-container-1 table");
+        if (table1) {
+          const rows = table1.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            content += `${rowData}\n`;
+          });
+        }
+
+        const table2 = document.querySelector("#table-container-2 table");
+        if (table2) {
+          const rows = table2.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            content += `${rowData}\n`;
+          });
+        }
+
+        // Output the number of stages
+        content += `${stages}\n`;
+
+        const table3 = document.querySelector("#table-container-3 table");
+        if (table3) {
+          const rows = table3.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            content += `${rowData}\n`;
+          });
+        }
+
+        content += `${terms} ${drainage} ${unitWeight}\n`;
+
+        const table4 = document.querySelector("#table-container-4 table");
+        if (table4) {
+          const rows = table4.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            const rowData = Array.from(inputs)
+              .map((input) => input.value)
+              .join(" ");
+            content += `${rowData}\n`;
+          });
+        }
+
+        const table5 = document.querySelector("#table-container-5 table");
+        if (table5) {
+          const rows = table5.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            const input = row.querySelector("input");
+            content += `${input.value}\n`;
+          });
+        }
+
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "output.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
+</html>
