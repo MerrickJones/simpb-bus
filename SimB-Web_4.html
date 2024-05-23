@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SimpB by Shan & Merrick &copy;</title>
+
+    <!-- CSS coding to control the styling of the code----------------------->
+
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -20,8 +23,13 @@
         flex-direction: column;
         margin: 0 5px;
       }
+      .input-box:first-child {
+        margin-left: 0;
+      }
+
       .input-box label {
         margin-bottom: 5px;
+        margin-top: 10px;
       }
       .input-box input {
         width: 100%;
@@ -29,19 +37,35 @@
         box-sizing: border-box;
       }
       .table-container {
-        margin-top: 20px;
+        margin-top: 0px;
+        margin-bottom: 5px;
         overflow-x: auto;
       }
+
+      .table-full {
+        width: 100%;
+      }
+
+      .table-medium {
+        width: 71.5%;
+      }
+
+      .table-small {
+        width: 10%;
+      }
+
       table {
         width: 95%;
         border-collapse: collapse;
         margin-top: 20px;
+        table-layout: fixed;
       }
       th,
       td {
         border: 1px solid #ccc;
         padding: 8px;
         text-align: left;
+        width: calc(100% / 7);
       }
       th {
         background-color: #f2f2f2;
@@ -69,6 +93,8 @@
         background-color: #45a049;
       }
     </style>
+
+    <!-- ------ Start of the HTML file ------------------------------------------------>
   </head>
   <body>
     <h1>Simplified B Input</h1>
@@ -88,12 +114,10 @@
       </div>
     </div>
 
-    <div id="table-container-1" class="table-container">
-      <!-- Dynamic table 1 will be inserted here -->
-    </div>
-    <div id="table-container-2" class="table-container">
-      <!-- Dynamic table 2 will be inserted here -->
-    </div>
+    <!-- Dynamic tables 1 & 2 for Thickness (m) & Compression index etc. -------->
+    <div id="table-container-1" class="table-container table-full"></div>
+
+    <div id="table-container-2" class="table-container table-medium"></div>
 
     <div class="input-container">
       <div class="input-box">
@@ -106,10 +130,8 @@
         />
       </div>
     </div>
-
-    <div id="table-container-3" class="table-container">
-      <!-- Dynamic table 3 will be inserted here -->
-    </div>
+    <!-- Dynamic table 3 for Vertical Stress (kPa) etc. here ------------------->
+    <div id="table-container-3" class="table-container table-medium"></div>
 
     <div class="input-container">
       <div class="input-box">
@@ -136,15 +158,13 @@
         <input type="number" id="unitWeight" oninput="updateOutput()" min="0" />
       </div>
     </div>
-
-    <div id="table-container-4" class="table-container">
-      <!-- Dynamic table 4 will be inserted here -->
-    </div>
+    <!-- Dynamic table 4 for Drain Spacing (m) here ------------------------------------>
+    <div id="table-container-4" class="table-container"></div>
 
     <div class="input-container">
       <div class="input-box">
         <label for="depthPoints"
-          >No. of depth point to output pore water pressure:</label
+          >No. of depth points to output pore water pressure:</label
         >
         <input
           type="number"
@@ -154,10 +174,8 @@
         />
       </div>
     </div>
-
-    <div id="table-container-5" class="table-container">
-      <!-- Dynamic table 5 will be inserted here -->
-    </div>
+    <!-- Dynamic table 5 for Depth Points of Pore Water Pressure here -->
+    <div id="table-container-5" class="table-container table-small"></div>
 
     <h2>Output:</h2>
     <div id="output">
@@ -456,9 +474,15 @@
           const table = document.createElement("table");
           const tbody = document.createElement("tbody");
 
-          // Create table rows
+          // Create table rows - This is the No. of points input x 4 -----------------------
           for (let i = 0; i < depthPoints * 4; i++) {
             const row = document.createElement("tr");
+
+            // Add a label cell for the row count on the left
+            const labelTd = document.createElement("td");
+            labelTd.innerText = i + 1; // Row number
+            row.appendChild(labelTd);
+
             const td = document.createElement("td");
             const input = document.createElement("input");
             input.type = "text";
