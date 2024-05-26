@@ -3,110 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="Bayesian, Forward Prediction, Back Analysis" />
+    
     <title>SimpB by Shan & Merrick &copy;</title>
 
-    <!-- CSS coding to control the styling of the code----------------------->
+    <!-- CSS coding to control the styling of the code saved in style.css file---------->
 
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      .input-container {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        margin-bottom: 15px;
-      }
-      .input-box {
-        display: flex;
-        flex-direction: column;
-        margin: 0 5px;
-      }
-      .input-box:first-child {
-        margin-left: 0;
-      }
+    <link rel="stylesheet" href="styles/styles.css"
 
-      .input-box label {
-        margin-bottom: 5px;
-        margin-top: 10px;
-      }
-      .input-box input {
-        width: 100%;
-        padding: 5px;
-        box-sizing: border-box;
-      }
-      .table-container {
-        margin-top: 0px;
-        margin-bottom: 5px;
-        overflow-x: auto;
-      }
-
-      .table-full {
-        width: 100%;
-      }
-
-      .table-medium {
-        width: 71.5%;
-      }
-
-      .table-small {
-        width: 10%;
-      }
-
-      table {
-        width: 95%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        table-layout: fixed;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-        width: calc(100% / 7);
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      .table-input {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 5px;
-      }
-      #output {
-        border: 1px solid #ccc;
-        padding: 10px;
-        white-space: pre-wrap;
-        margin-top: 20px;
-      }
-      button {
-        margin-top: 20px;
-        padding: 10px 15px;
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #45a049;
-      }
-
-      h5 {
-            color: black; /* Change text color to blue */
-            font-size: 13px; /* Change font size */
-            font-family: Arial, sans-serif; /* Change font family */
-            text-align: left; /* Center align the text */
-            margin-top: 0px;
-            margin-bottom: 0px;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- ------ Start of the HTML file ------------------------------------------------>
   </head>
   <body>
     <h1>Simplified B Input</h1>
+      <!-- run the program-->
+    <form id="inputform" action="/run-program" method="'post"> 
 
     <div class="input-container">
       <div class="input-box">
@@ -219,7 +131,7 @@
             </div>
             
           </div> 
-          <p>User to input the top & bottom layer ID either side of sand layer </p>
+          <p>User to input the top & bottom layer ID either side of sand layer, othwerwise enter 0 </p>
           <p>i.e for a three layered model with middle sand layer (No. = 1) user input 1, 1, 3, 3 </p>
           <p>i.e for a five layered model with middle sand layer  (No. = 1) user input 1, 2, 4, 5 </p>
           </div>
@@ -227,8 +139,72 @@
           <!-- Dynamic table 7 for excess pore pressure to Zero here ------------------>
           <div id="table-container-7" class="table-container table-medium"></div>
           
+          <img src="images/3 layers.jpg" alt="An image of the logo" /><img src="images/5 layers.jpg" alt="An image of the logo" />
+          <br>
+          
+          <!-- RUN PROGRAM BUTTON-------------------------------------------------->
+          <button type="submit">Run Program</button>
+          </form>
 
+          <canvas id="settChart" width="400" height="200"></canvas>
+          <canvas id="eppChart" width="400" height="200"></canvas>
+
+          <!-- Script for Chart start here------------------------------------------------------------->
+          <script>
+            document.getElementById('inputform').addEventListener('submit', function(event) {
+              event.preventDefault();
+              
+              const formData = new FormData(this);
+              fetch('/run-program', {
+                  method: 'POST',
+                  body: formData
+              })
+              .then(response => response.json())
+              .then(data => {
+                  displayCharts(data.sett_res, data.epp_res);
+              })
+              .catch(error => console.error('Error:', error));
+            });
+      
+            function displayCharts(settRes, eppRes) {
+              const settData = settRes.map(line => parseFloat(line.trim()));
+              const eppData = eppRes.map(line => parseFloat(line.trim()));
+              
+              const ctx1 = document.getElementById('settChart').getContext('2d');
+              new Chart(ctx1, {
+                  type: 'line',
+                  data: {
+                      labels: Array.from({length: settData.length}, (_, i) => i + 1),
+                      datasets: [{
+                          label: 'Settlement',
+                          data: settData,
+                          borderColor: 'blue',
+                          fill: false
+                      }]
+                  }
+              });
+              
+              const ctx2 = document.getElementById('eppChart').getContext('2d');
+              new Chart(ctx2, {
+                  type: 'line',
+                  data: {
+                      labels: Array.from({length: eppData.length}, (_, i) => i + 1),
+                      datasets: [{
+                          label: 'Excess Pore Pressure',
+                          data: eppData,
+                          borderColor: 'red',
+                          fill: false
+                      }]
+                  }
+              });
+            }
+          </script>
+
+          <!-- Script for Chart end here------------------------------------------------------------->
     <h2>Output:</h2>
+
+
+
     <div id="output">
       <!-- Output will be displayed here -->
     </div>
@@ -673,6 +649,8 @@
 
             updateOutput(); // Ensure output is updated when the table is generated
         }
+
+        
 
       // EXPORT FILE UPDATES----------------------------------------------------------------------------
 
