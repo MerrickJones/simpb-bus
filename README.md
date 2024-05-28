@@ -12,6 +12,8 @@ your-flask-app/
 
 ├── server.py
 
+├── simplified_B.exe
+
 ├── requirements.txt
 
 ├── Procfile
