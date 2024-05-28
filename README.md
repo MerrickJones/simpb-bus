@@ -29,5 +29,6 @@ your-flask-app/
             └── 5 layers
 
 ├── templates/
+
         ├── index.html
         └── output.html
