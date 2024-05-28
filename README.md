@@ -16,9 +16,7 @@ your-flask-app/
 
 ├── requirements.txt
 
-├── Procfile
-
-├── runtime.txt (optional)
+├── input.txt 
 
 ├── static/
 
