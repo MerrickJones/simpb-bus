@@ -19,9 +19,9 @@ your-flask-app/
 ├── runtime.txt (optional)
 
 ├── static/
-│   └── styles/
-│       └── styles.css
+    │   └── styles/
+    │       └── styles.css
 
-└── templates/
-    ├── index.html
-    └── output.html
+    └── templates/
+        ├── index.html
+        └── output.html
