@@ -21,6 +21,9 @@ your-flask-app/
 ├── static/
     │   └── styles/
     │       └── styles.css
+        └── images/
+            └── 3 layers
+            └── 5 layers
 
     └── templates/
         ├── index.html
