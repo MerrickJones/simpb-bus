@@ -21,6 +21,7 @@ your-flask-app/
 ├── runtime.txt (optional)
 
 ├── static/
+
     │   └── styles/
     │       └── styles.css
         └── images/
