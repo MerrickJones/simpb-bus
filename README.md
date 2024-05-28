@@ -10,12 +10,17 @@ The program runs via a .exe program file.
 your-flask-app/
 │
 ├── server.py
+
 ├── requirements.txt
+
 ├── Procfile
+
 ├── runtime.txt (optional)
+
 ├── static/
 │   └── styles/
 │       └── styles.css
+
 └── templates/
     ├── index.html
     └── output.html
