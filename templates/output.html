@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="Bayesian, Forward Prediction, Back Analysis" />
+    <title>SimpB by Shan & Merrick &copy;</title>
+    <link rel="stylesheet" href="static/styles/styles.css" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        canvas {
+            max-width: 80%; /* Adjust the size of the charts */
+            height: auto;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Program Output</h1>
+    
+    <canvas id="settChart"></canvas>
+    <canvas id="eppChart"></canvas>
+    
+    <h2>Settlement Results</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time (days)</th>
+                <th>Surface Settlement</th>
+                <th>Column 3</th>
+                <th>Column 4</th>
+                <th>Column 5</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in sett_res_data %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h2>Excess Pore Pressure Results</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time (days)</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in epp_res_data %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/">Go Back</a>
+    <button onclick="exportToCSV()">Export to CSV</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Parse the data passed from the server
+            const settResData = {{ sett_res_data|tojson }};
+            const eppResData = {{ epp_res_data|tojson }};
+
+            // Prepare data for sett.res chart
+            const settLabels = settResData.map(row => row[0]);
+            const settDatasets = [];
+            for (let i = 1; i < 5; i++) {
+                settDatasets.push({
+                    label: `Column ${i+1}`,
+                    data: settResData.map(row => row[i]),
+                    fill: false,
+                    borderColor: getRandomColor(),
+                    tension: 0.1
+                });
+            }
+
+            // Prepare data for epp.res chart
+            const eppLabels = eppResData.map(row => row[0]);
+            const eppDatasets = [];
+            for (let i = 1; i < 3; i++) {
+                eppDatasets.push({
+                    label: `Column ${i+1}`,
+                    data: eppResData.map(row => row[i]),
+                    fill: false,
+                    borderColor: getRandomColor(),
+                    tension: 0.1
+                });
+            }
+
+            // Function to generate random colors
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
+            // Render sett.res chart
+            const settCtx = document.getElementById('settChart').getContext('2d');
+            new Chart(settCtx, {
+                type: 'line',
+                data: {
+                    labels: settLabels,
+                    datasets: settDatasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Settlement'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Time (days)'
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return Math.floor(value); // Display nearest whole number
+                                }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Settlement (m)'
+                            },
+                            reverse: true // Invert the y-axis
+                        }
+                    }
+                }
+            });
+
+            // Render epp.res chart
+            const eppCtx = document.getElementById('eppChart').getContext('2d');
+            new Chart(eppCtx, {
+                type: 'line',
+                data: {
+                    labels: eppLabels,
+                    datasets: eppDatasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Excess Pore Pressure'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Time (days)'
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return Math.floor(value); // Display nearest whole number
+                                }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Values'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        function exportToCSV() {
+            function convertArrayToCSV(array) {
+                return array.map(row => row.join(',')).join('\n');
+            }
+
+            const settResData = {{ sett_res_data|tojson }};
+            const eppResData = {{ epp_res_data|tojson }};
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Settlement Results\n";
+            csvContent += convertArrayToCSV([["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"]].concat(settResData));
+            csvContent += "\n\nExcess Pore Pressure Results\n";
+            csvContent += convertArrayToCSV([["Column 1", "Column 2", "Column 3"]].concat(eppResData));
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "results.csv");
+            document.body.appendChild(link);
+
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
