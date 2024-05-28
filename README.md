@@ -28,6 +28,6 @@ your-flask-app/
             └── 3 layers
             └── 5 layers
 
-    └── templates/
+├── templates/
         ├── index.html
         └── output.html
